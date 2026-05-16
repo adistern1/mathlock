@@ -79,11 +79,7 @@ class MainActivity : FlutterActivity() {
                             android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 )
             }
-            // Prevent back button from exiting
-            onBackPressedDispatcher.addCallback(this,
-                object : androidx.activity.OnBackPressedCallback(true) {
-                    override fun handleOnBackPressed() { /* blocked */ }
-                })
+            // Prevent back button from exiting (handled by onBackPressed override below)
         }
     }
 
@@ -92,6 +88,14 @@ class MainActivity : FlutterActivity() {
         screenReceiver = ScreenReceiver()
         val filter = IntentFilter(Intent.ACTION_SCREEN_ON)
         registerReceiver(screenReceiver, filter)
+    }
+
+    @Suppress("OVERRIDE_DEPRECATION")
+    override fun onBackPressed() {
+        if (intent?.action != ACTION_OVERLAY_QUIZ) {
+            super.onBackPressed()
+        }
+        // else: blocked — child cannot dismiss the quiz screen with back
     }
 
     override fun onDestroy() {
