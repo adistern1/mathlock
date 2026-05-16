@@ -226,7 +226,6 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
               Switch(
                 value: _overlayEnabled,
                 onChanged: _toggleOverlay,
-                activeThumbColor: Colors.greenAccent,
               ),
             ],
           ),
