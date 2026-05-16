@@ -1,0 +1,72 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.1'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release --no-shrink
+
+      - name: Rename APK
+        run: mv build/app/outputs/flutter-apk/app-release.apk MathLock.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MathLock-APK
+          path: MathLock.apk
+
+      - name: Create/Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "MathLock — Latest Build"
+          body: |
+            ## 📲 התקנה על Android
+
+            1. לחץ על **MathLock.apk** להורדה
+            2. פתח את הקובץ בטלפון
+            3. אפשר "התקנה ממקורות לא ידועים" אם מתבקש
+            4. פתח את האפליקציה ולחץ "תן הרשאה"
+
+            ## 🗑️ הסרה
+            הגדרות הורה → הסר אפליקציה
+          files: MathLock.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update download URL in landing page
+        run: |
+          APK_URL="https://github.com/${{ github.repository }}/releases/latest/download/MathLock.apk"
+          sed -i "s|APK_DOWNLOAD_URL|$APK_URL|g" docs/index.html
+
+      - name: Deploy GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          force_orphan: true
