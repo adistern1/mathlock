@@ -2,7 +2,7 @@ name: Build & Release APK
 
 on:
   push:
-    branches: [main]
+    branches: [master, main]
   workflow_dispatch:
 
 jobs:
@@ -58,15 +58,3 @@ jobs:
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update download URL in landing page
-        run: |
-          APK_URL="https://github.com/${{ github.repository }}/releases/latest/download/MathLock.apk"
-          sed -i "s|APK_DOWNLOAD_URL|$APK_URL|g" docs/index.html
-
-      - name: Deploy GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          force_orphan: true
